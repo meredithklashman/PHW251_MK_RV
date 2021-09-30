@@ -1,6 +1,7 @@
 ---
 title: "Milestone 2"
 author: "Meredith Klashman and Ruben Vargas"
+date: "September 30, 2021" 
 output: html_document
 ---
 
