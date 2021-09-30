@@ -1,5 +1,6 @@
 ---
 title: "Milestone 2"
+author: "Meredith Klashman and Ruben Vargas"
 output: html_document
 ---
 
