@@ -9,6 +9,8 @@ output: html_document
 #hi ruben
 
 #For future use, enter into terminal : git config credential.helper store
+git config --global user.email "name@example.edu""
+git config --global user.name "meredithklashhman"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
