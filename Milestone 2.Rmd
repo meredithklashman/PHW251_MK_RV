@@ -7,6 +7,9 @@ output: html_document
 
 # hi meredith
 #hi ruben
+
+#For future use, enter into terminal : git config credential.helper store
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
