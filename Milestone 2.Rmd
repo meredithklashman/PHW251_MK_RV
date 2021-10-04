@@ -1,7 +1,7 @@
 ---
 title: "Milestone 2"
 author: "Meredith Klashman and Ruben Vargas"
-date: "September 30, 2021" 
+date: "October 4, 2021" 
 output: html_document
 ---
 
@@ -17,20 +17,43 @@ library(dplyr)
 library(tidyverse)
 ```
 
+Population of Interest: non-homeowners and aging individuals 
+- include total count of mortality from chronic health conditions over the past few years
+- summarize a total count of occurrences attributed to known chronic health conditions from 2014-2019
+- locate 5 counties that share three common attributes: low population per square mile `pop12_sqmi1`, high median age `med_age`, a high proportion of renters vs. homeowners (you may need to create a new variable somehow for this third criteria)
+- locate the most recent account of OSHPD funding for projects that are in closure, and join the demographics data to your OSHPD funding dataframe
+- expand your dataframe further by exploring the 2014-2019 Final Deaths by Year data, locating the chronic disease counts by their descriptions, grouping and summarizing at the county level, (you may encounter missing values here, it's understood that replacing NAs with 0 is appropriate)
+- join the summarized count of Deaths to expand your OSHPD dataset for analysis
+- create a print quality table and data visualization (plot)  to bring to the next DHE business strategy meeting and explain why these particular top 5 counties should be selected for development funding partnerships
+
+
+
 Description of dataset
 What is the data source? (1-2 sentences on where the data is coming from, dates included, etc.)
+
+- The 3 datasets (oshpd hospital cost, mortality by county, & CA county demographics) that we will be utilizing in this project come from the PHW251 Box Folder. For the OSHPD hospital cost we have data dating back to Septemeber 2013, the mortality data from 2014-2019 and the county demographics from 2012. 
+
+
 How does the dataset relate to the group problem statement and question?
 
-Import statement
-NOTE: Please use datasets available in the PHW251 Box folder (Links to an external site.) (this is important to make sure everyone is using the same datasets)
+\newpage
+Import
+
+Use appropriate import function and package based on the type of file
 ```{r, import_data}
 hospital_cost <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/oshpd_hospital_cost.csv")
 mort_county <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/mort_by_county.csv")
 county_demo <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/ca_county_demographics.csv")
 
+hospital_cost
+mort_county
+county_demo
 ```
-Use appropriate import function and package based on the type of file
 Utilize function arguments to control relevant components (i.e. change column types, column names, missing values, etc.)
+```{r, function_arguments}
+
+
+```
 Document the import process
 
 Identify data types for 5+ data elements/columns/variables
