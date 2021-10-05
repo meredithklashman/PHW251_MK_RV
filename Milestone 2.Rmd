@@ -1,8 +1,10 @@
 ---
 title: "Milestone 2"
 author: "Meredith Klashman and Ruben Vargas"
-date: "October 4, 2021" 
-output: html_document
+date: "October 4, 2021"
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 #For future use, enter into terminal : git config credential.helper store
@@ -46,9 +48,6 @@ hospital_cost <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_
 mort_county <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/mort_by_county.csv")
 county_demo <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/ca_county_demographics.csv")
 
-hospital_cost
-mort_county
-county_demo
 ```
 Utilize function arguments to control relevant components (i.e. change column types, column names, missing values, etc.)
 
