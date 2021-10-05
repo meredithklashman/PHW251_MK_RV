@@ -5,9 +5,6 @@ date: "October 4, 2021"
 output: html_document
 ---
 
-# hi meredith
-#hi ruben
-
 #For future use, enter into terminal : git config credential.helper store
 git config --global user.email "name@example.edu""
 git config --global user.name "meredithklashhman"
@@ -36,7 +33,11 @@ What is the data source? (1-2 sentences on where the data is coming from, dates 
 
 How does the dataset relate to the group problem statement and question?
 
+- We will have to manipulate some of the columns and tidy up the data; however, we have all the data that is needed in order to further investigate our problem statement and questions of interest. 
+
+
 \newpage
+
 Import
 
 Use appropriate import function and package based on the type of file
@@ -50,18 +51,57 @@ mort_county
 county_demo
 ```
 Utilize function arguments to control relevant components (i.e. change column types, column names, missing values, etc.)
-```{r, function_arguments}
 
+```{r, data_manipulation}
+# will use for future milestones
+
+# here is where we will manipulate and tidy up the data
 
 ```
-Document the import process
+
+
+\newpage
 
 Identify data types for 5+ data elements/columns/variables
 Identify 5+ data elements required for your specified scenario. If <5 elements are required to complete the analysis, please choose additional variables of interest in the data set to explore in this milestone.
+
+- we will be using `pop2012`, `pop2012_sqmi`, `med_age`, `households`, `owner_occ`, and `renter_occ` from the count_demo dataframe. We will have to use these columns to create a new variable that will be essential for investigating our problem statement. We will also be using race/ethnicity, county, and age factors from the mort_county and county_demo dataframes to narrow down and focus on 5 counties of interest. 
+
 Utilize functions or resources in RStudio to determine the types of each data element (i.e. character, numeric, factor)
+
+```{r, element}
+class(county_demo$pop12_sqmi)
+typeof(county_demo$pop12_sqmi)
+
+class(county_demo$pop2012)
+typeof(county_demo$pop2012)
+
+class(county_demo$med_age)
+typeof(county_demo$med_age)
+
+class(county_demo$renter_occ)
+typeof(county_demo$renter_occ)
+
+class(county_demo$owner_occ)
+typeof(county_demo$owner_occ)
+
+class(county_demo$households)
+typeof(county_demo$households)
+
+
+demo_summary <- summary(county_demo)
+cost_summary <- summary(hospital_cost)
+mort_summary <- summary(mort_county)
+
+demo_summary
+cost_summary
+mort_summary
+```
 Identify the desired type/format for each variable—will you need to convert any columns to numeric or another type? 
 
+- As we do not want to be dealing with "half households" or "0.25 of a person" we likely will keep those as integers and not convert them to numeric. We might actually prefer that all of our values are in integer format and may change the few that are numeric to integer using the `as.integer()` function
+
+
 Provide a basic description of the 5+ data elements
-Numeric: mean, median, range
-Character:  unique values/categories
-Or any other descriptives that will be useful to the analysis
+
+- We will likely be looking at the means of the 5+ data elements that we have chosen and use the values to determine the 5 counties that we will be focusing on based on the common attributes that were mentioned in the description of our problem statement on page one. We will be focused on looking at the counties with the higher proportion of non-homeowners based on our calculations and manipulation of the data that we are provided. 
