@@ -29,27 +29,32 @@ mortality[is.na(mortality)] = 0
 NEW VARIABLE
 ```{r}
 #Create a Variable to Indicate Chronic Condition 
-
  
 #Chronic Health Conditions defined as the following: 
     #Alzheimer's disease
     #Chronic lower respiratory diseases
-    #Diabetes Mellitus
+    #Diabetes mellitus
     #Essential hypertension and hypertensive renal disease
     #Chronic liver disease and cirrhosis
     #Parkinson's disease
 
-#summarize a total count of occurrences attributed to known chronic health
-#conditions, circa 2014-2019.
-
-#include a *total count of mortality from chronic health conditions* over the 
-#past few years into the county level analysis. 
-
-#exploring the 2014-2019 Final Deaths by Year data, locating the chronic disease 
-#counts by their descriptions, grouping and summarizing at the county level, 
+mortality <- mortality %>% 
+  mutate(Chronic = case_when(Cause_Desc %in% c("Alzheimer's disease",
+                    "Chronic lower respiratory diseases", "Diabetes mellitus",
+                    "Essential hypertension and hypertensive renal disease",
+                    "Chronic liver disease and cirrhosis", 
+                    "Parkinson's disease") ~ "Yes",
+                    TRUE ~ "No"))
 ```
 
-NEW VARIABLE AND SUBSET DATA
+SUBSET DATA 
+```{r}
+mortality <- mortality %>% 
+              filter(Chronic == "Yes")%>%
+              filter (Strata == "Total Population")
+```
+
+NEW VARIABLE
 ```{r}
 #Calculate Rent vs Homeowners 
 
@@ -83,7 +88,17 @@ hospital_cost_closure <- hospital_cost %>% filter(OSHPD.Project.Status ==
 
 DATA CLEANING 
 ```{r}
-#Counties in OSHPD frame 
+library(tidyr)
+
+hospital_cost_closure_clean <- hospital_cost_closure %>% 
+                       separate(County, c('Number','County_Name_1', 
+                       'County_Name_2', 'County_Name_3' )) 
+  
+hospital_cost_closure_clean [is.na(hospital_cost_closure_clean)] <- ""
+
+hospital_cost_closure_clean <- hospital_cost_closure_clean %>% unite(County_Name,
+                              'County_Name_1','County_Name_2','County_Name_3', 
+                              sep = " ", remove = TRUE )
 ```
 
 DATA JOIN 
