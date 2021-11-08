@@ -1,0 +1,104 @@
+---
+title: "Milestone 3 Workflow"
+author: "Meredith Klashhman and Ruben Vargas"
+date: "11/8/2021"
+output: pdf_document
+---
+
+Connect to Data Files 
+```{r}
+getwd()
+
+countydemo <- read.csv("/home/rstudio/PHW251_MK_RV/ca_county_demographics.csv",
+                       header=TRUE)
+mortality <- read.csv("/home/rstudio/PHW251_MK_RV/mort_by_county.csv", header = 
+                        TRUE)
+hospital_cost <- read.csv("/home/rstudio/PHW251_MK_RV/oshpd_hospital_cost.csv", 
+                          header = TRUE)
+```
+
+
+DATA CLEANING 
+```{r}
+#Edit Mortality to replace NA with 0 
+
+mortality[is.na(mortality)] = 0 
+```
+
+
+NEW VARIABLE
+```{r}
+#Create a Variable to Indicate Chronic Condition 
+
+ 
+#Chronic Health Conditions defined as the following: 
+    #Alzheimer's disease
+    #Chronic lower respiratory diseases
+    #Diabetes Mellitus
+    #Essential hypertension and hypertensive renal disease
+    #Chronic liver disease and cirrhosis
+    #Parkinson's disease
+
+#summarize a total count of occurrences attributed to known chronic health
+#conditions, circa 2014-2019.
+
+#include a *total count of mortality from chronic health conditions* over the 
+#past few years into the county level analysis. 
+
+#exploring the 2014-2019 Final Deaths by Year data, locating the chronic disease 
+#counts by their descriptions, grouping and summarizing at the county level, 
+```
+
+NEW VARIABLE AND SUBSET DATA
+```{r}
+#Calculate Rent vs Homeowners 
+
+library(dplyr)
+
+countydemo <- countydemo %>% 
+              mutate(RatioRenttoOwn = renter_occ/owner_occ)
+
+```
+
+SUBSET DATA 
+```{r}
+#locate 5 counties that share three common attributes: low population per 
+#square mile `pop12_sqmi1`, high median age 
+#`med_age`, a high proportion of renters vs. homeowners 
+
+countydemo5 <- countydemo %>%  filter (pop12_sqmi < 30) %>% 
+                filter (med_age > 30) %>% 
+                filter (RatioRenttoOwn > 0.6)
+```
+
+SUBSET DATA 
+```{r}
+
+#locate the most recent account of OSHPD funding for projects that are in 
+#closure 
+
+hospital_cost_closure <- hospital_cost %>% filter(OSHPD.Project.Status == 
+                                                    "In Closure")
+```
+
+DATA CLEANING 
+```{r}
+#Counties in OSHPD frame 
+```
+
+DATA JOIN 
+join the demographics data to your OSHPD funding dataframe.
+
+DATA JOIN 
+Like you've done before, you will join the summarized count of Deaths to expand your OSHPD dataset for analysis.
+
+FINAL DOCUMENT 
+4.	Data dictionary based on clean dataset (minimum 4 data elements), including:
+o	Variable name
+o	Data type
+o	Description
+5.	One or more tables with descriptive statistics for 4 data elements
+6.	PDF that is professionally prepared for presentation
+o	Each part of the milestone is clearly on one page (use \newpage to push to a new page)
+o	Only the necessary information is outputted (you should suppress, for example, entire data frame outputs)
+o	Use of headers and sub headers to create an organized document
