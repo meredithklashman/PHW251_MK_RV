@@ -1,0 +1,194 @@
+---
+title: "Milestone 4"
+author: "Meredith Klashman and Ruben Vargas"
+date: "11/29/2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+```
+
+# Data Connection and Cleanup from Milestone 3 
+```{r}
+getwd()
+
+countydemo <- read.csv("/home/rstudio/PHW251_MK_RV/ca_county_demographics.csv",
+                      header=TRUE %>%
+  select(-c("X", "families", "hse_units", "ave_fam_sz", "vacant", "county_fips")) %>%
+  rename(County = name))
+
+mortality <- read.csv("/home/rstudio/PHW251_MK_RV/mort_by_county.csv", header = 
+                       TRUE)
+hospital_cost <- read.csv("/home/rstudio/PHW251_MK_RV/oshpd_hospital_cost.csv", 
+                        header = TRUE)
+
+# countydemo <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/ca_county_demographics.csv",
+                       # header = T) %>%
+  # select(-c("X", "families", "hse_units", "ave_fam_sz", "vacant", "county_fips")) %>%
+  # rename(County = name)
+
+# mortality <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/mort_by_county.csv",
+                       # header = T)
+
+# hospital_cost <- read.csv("/Users/rubenvargas/Desktop/Public Health W251/PHW251_MK_RV/oshpd_hospital_cost.csv",
+                      # header = T)
+```
+
+```{r}
+#Edit Mortality to replace NA with 0 
+
+mortality[is.na(mortality)] = 0 
+```
+
+```{r}
+#Create a Variable to Indicate Chronic Condition 
+ 
+#Chronic Health Conditions defined as the following: 
+    #Alzheimer's disease
+    #Chronic lower respiratory diseases
+    #Diabetes mellitus
+    #Essential hypertension and hypertensive renal disease
+    #Chronic liver disease and cirrhosis
+    #Parkinson's disease
+
+library(dplyr)
+mortality <- mortality %>% 
+  mutate(Chronic = case_when(Cause_Desc %in% c("Alzheimer's disease",
+                    "Chronic lower respiratory diseases", "Diabetes mellitus",
+                    "Essential hypertension and hypertensive renal disease",
+                    "Chronic liver disease and cirrhosis", 
+                    "Parkinson's disease") ~ "Yes",
+                    TRUE ~ "No"))
+```
+
+```{r}
+#subtotal for mortality from chronic in each county per year 
+
+library(tidyr)
+mortality_chronic <- mortality %>% 
+              filter(Chronic == "Yes")%>%
+              filter(Strata == "Total Population") %>%
+              group_by(County,Year) %>%
+              mutate(County_Year_Chronic_Mortality = sum(Count))
+
+```
+
+```{r}
+#Calculate Rent vs Homeowners Ratio 
+
+library(dplyr)
+
+countydemo <- countydemo %>% 
+              mutate(RatioRenttoOwn = renter_occ/owner_occ)
+
+```
+
+```{r}
+#locate 5 counties that share three common attributes: low population per 
+#square mile `pop12_sqmi1`, high median age 
+#`med_age`, a high proportion of renters vs. homeowners 
+
+countydemo5 <- countydemo %>%  filter (pop12_sqmi < 30) %>% 
+                filter (med_age > 30) %>% 
+                filter (RatioRenttoOwn > 0.6)
+                
+```
+
+```{r}
+
+#locate the most recent account of OSHPD funding for projects that are in 
+#closure 
+
+hospital_cost_closure <- hospital_cost %>% filter(OSHPD.Project.Status == 
+                                                    "In Closure")
+```
+
+```{r}
+#Optimize data for joining (edit so all county naming is same format)
+
+library(tidyr)
+
+hospital_cost_closure_clean <- hospital_cost_closure %>% 
+                       separate(County, c('Number','County_Name_1', 
+                       'County_Name_2', 'County_Name_3' )) 
+hospital_cost_closure_clean [is.na(hospital_cost_closure_clean)] <- ""
+hospital_cost_closure_clean <- hospital_cost_closure_clean %>% unite(County,
+                              'County_Name_1','County_Name_2','County_Name_3', 
+                              sep = " ", remove = TRUE ) 
+
+county_demo_clean <- countydemo %>% separate(County, c('County_Name_1', 
+                      'County_Name_2', 'County_Name_3' )) 
+county_demo_clean [is.na(county_demo_clean )] <- ""
+county_demo_clean <- county_demo_clean %>% 
+                      unite(County,'County_Name_1','County_Name_2',
+                      'County_Name_3', sep = " ", remove = TRUE )
+
+mortality_chronic_clean <- mortality_chronic %>% separate(County, c(
+                      'County_Name_1','County_Name_2', 'County_Name_3' )) 
+mortality_chronic_clean [is.na(mortality_chronic_clean)] <- ""
+mortality_chronic_clean <- mortality_chronic_clean %>%
+                      unite(County,'County_Name_1','County_Name_2',
+                      'County_Name_3', sep = " ", remove = TRUE ) 
+
+```
+
+# Milestone 4 Visualizations 
+
+## Join Datasets for Analysis 
+```{r}
+Merged_Dataset <- left_join(hospital_cost_closure_clean, county_demo_clean, 
+                  by = "County", copy = TRUE)
+Merged_Dataset <- left_join(Merged_Dataset, mortality_chronic_clean, 
+                  by = "County", copy = TRUE)
+```
+
+## Figure 1: Plot of Requested Population Parameters
+```{r, echo = TRUE}
+library(ggplot2)
+
+ggplot(data = county_demo_clean) + geom_point(mapping = aes(x = med_age, y = RatioRenttoOwn,size= pop12_sqmi),color = "black", fill = "black"
+)+theme_bw()+labs(x = "Median Age", y = "Ratio Renters to Owners", title =
+"Median Age vs. Renters to Owners vs. Population Size", subtitle = 
+"Represented at the County Level", size = "Populattion per SqMi")
+```
+
+Interpretation: County Level Data indicates that Median Age has an inverse relationship with proportion of Renters: older populations have a higher 
+proportion of home ownership. The largest populations tend to sit within the
+mode of the dataset in terms of both Median Age and Ratio of Renters to owners. 
+\newpage
+
+## Figure 2: Table 
+```{r, echo = TRUE}
+Merged_Dataset$County <- trimws(Merged_Dataset$County, which = c("right"))
+
+x <- Merged_Dataset %>% filter(County == c("Mendocino", "Mono", "Colusa", "Del Norte", "Glenn"))
+
+x <- x %>% group_by(County) %>%
+  summarize(total_mortality = sum(Count))
+
+x2 <- left_join(countydemo5, x, by = "County") %>%
+  select(c("County", "pop2012", "pop12_sqmi", "med_age", "owner_occ", "renter_occ", "RatioRenttoOwn", "total_mortality")) %>%
+  group_by(County) %>%
+  mutate(total_mortality = sum(total_mortality))
+
+kable(x2,digits = 2, booktabs = F, longtable = F, col.names = c("County", "Population", "Population per Square Mile", "Median Age", "Homeowners", "Renters", "Renter to Homeowner Ratio", "Total Mortality"), caption = "2014-2019 Chronic Mortality and Demographic Data of 5 at Risk Counties")
+
+```
+Interpretation: Given the 5 counties that we determined to have 3 similar attributes of low population per square mile, high median age, and a high proportion of renters vs. homeowners, we see that the chronic mortality is quite significant in 4/5 counties. Mono County may have no results due to lack of responses (NA inputs) or due to how small the population in the county is. 
+
+\newpage
+
+## Figure 3: Table of Choice 
+```{r, echo = TRUE}
+#Ruben: Use Merged_Dataset. Countydemo5 data indicates the selected 5 counties
+#if you want to focus on those for one of the tables!
+#Include code for title and footnote. 
+#format all variables (i.e Strata Name instead of Strata_Name)
+
+#i.e. hospital closure data for those 5 counties 
+```
+Interpretation: (Ruben: 1-2 Sentences
