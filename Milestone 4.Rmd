@@ -55,7 +55,6 @@ mortality[is.na(mortality)] = 0
     #Chronic liver disease and cirrhosis
     #Parkinson's disease
 
-library(dplyr)
 mortality <- mortality %>% 
   mutate(Chronic = case_when(Cause_Desc %in% c("Alzheimer's disease",
                     "Chronic lower respiratory diseases", "Diabetes mellitus",
@@ -68,7 +67,6 @@ mortality <- mortality %>%
 ```{r}
 #subtotal for mortality from chronic in each county per year 
 
-library(tidyr)
 mortality_chronic <- mortality %>% 
               filter(Chronic == "Yes")%>%
               filter(Strata == "Total Population") %>%
@@ -79,8 +77,6 @@ mortality_chronic <- mortality %>%
 
 ```{r}
 #Calculate Rent vs Homeowners Ratio 
-
-library(dplyr)
 
 countydemo <- countydemo %>% 
               mutate(RatioRenttoOwn = renter_occ/owner_occ)
@@ -99,7 +95,6 @@ countydemo5 <- countydemo %>%  filter (pop12_sqmi < 30) %>%
 ```
 
 ```{r}
-
 #locate the most recent account of OSHPD funding for projects that are in 
 #closure 
 
@@ -109,8 +104,6 @@ hospital_cost_closure <- hospital_cost %>% filter(OSHPD.Project.Status ==
 
 ```{r}
 #Optimize data for joining (edit so all county naming is same format)
-
-library(tidyr)
 
 hospital_cost_closure_clean <- hospital_cost_closure %>% 
                        separate(County, c('Number','County_Name_1', 
@@ -167,15 +160,15 @@ Merged_Dataset$County <- trimws(Merged_Dataset$County, which = c("right"))
 
 x <- Merged_Dataset %>% filter(County == c("Mendocino", "Mono", "Colusa", "Del Norte", "Glenn"))
 
-x <- x %>% group_by(County) %>%
+x1 <- x %>% group_by(County) %>%
   summarize(total_mortality = sum(Count))
 
-x2 <- left_join(countydemo5, x, by = "County") %>%
+x2 <- left_join(countydemo5, x1, by = "County") %>%
   select(c("County", "pop2012", "pop12_sqmi", "med_age", "owner_occ", "renter_occ", "RatioRenttoOwn", "total_mortality")) %>%
   group_by(County) %>%
   mutate(total_mortality = sum(total_mortality))
 
-kable(x2,digits = 2, booktabs = F, longtable = F, col.names = c("County", "Population", "Population per Square Mile", "Median Age", "Homeowners", "Renters", "Renter to Homeowner Ratio", "Total Mortality"), caption = "2014-2019 Chronic Mortality and Demographic Data of 5 at Risk Counties")
+kable(x2, digits = 2, booktabs = F, longtable = F, col.names = c("County", "Population", "Population per Square Mile", "Median Age", "Homeowners", "Renters", "Renter to Homeowner Ratio", "Total Mortality"), caption = "2014-2019 Chronic Mortality and Demographic Data of 5 at Risk Counties")
 
 ```
 Interpretation: Given the 5 counties that we determined to have 3 similar attributes of low population per square mile, high median age, and a high proportion of renters vs. homeowners, we see that the chronic mortality is quite significant in 4/5 counties. Mono County may have no results due to lack of responses (NA inputs) or due to how small the population in the county is. 
@@ -184,11 +177,24 @@ Interpretation: Given the 5 counties that we determined to have 3 similar attrib
 
 ## Figure 3: Table of Choice 
 ```{r, echo = TRUE}
-#Ruben: Use Merged_Dataset. Countydemo5 data indicates the selected 5 counties
-#if you want to focus on those for one of the tables!
-#Include code for title and footnote. 
-#format all variables (i.e Strata Name instead of Strata_Name)
+x3 <- x %>% group_by(County) %>%
+  summarize(total_mortality = sum(Count))
 
-#i.e. hospital closure data for those 5 counties 
+hospital_cost_closure_clean$County <- trimws(hospital_cost_closure_clean$County, which = c("right"))
+
+x4 <- left_join(x3, hospital_cost_closure_clean, by = "County") %>%
+  select(c("County", "Total.Costs.of.OSHPD.Projects", "Number.of.OSHPD.Projects", "total_mortality")) %>%
+  group_by(County) %>%
+  summarize(total_cost = sum(Total.Costs.of.OSHPD.Projects),
+         total_projects = sum(Number.of.OSHPD.Projects))
+
+x5 <- left_join(x4, x3, by = "County")
+x6 <- left_join(x2, x5, by = "County")
+
+x7 <- x6 %>% select(c("County", "pop12_sqmi", "RatioRenttoOwn", "total_cost", "total_projects", "total_mortality.y"))
+
+kable(x7, digits = 2, booktabs = F, longtable = F, col.names = c("County", "Population per Square Mile", "Renter to Homeowner Ratio", "Total Cost of OSHPD Projects", "Number of OSHPD Projects", "Total Chronic Mortality"), caption = "OSHPD Funding for Projects that are in Closure in 5 Targeted Counties between 2014 and 2019")
+
+
 ```
-Interpretation: (Ruben: 1-2 Sentences
+Interpretation: We can use this chart to make recommendations that these 5 counties would benefit from more funding in OSHPD projects based on the minimal amount they have gotten in the passed and argue it would lessen chronic mortality. 
